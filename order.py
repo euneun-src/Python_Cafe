@@ -1,5 +1,5 @@
-CSVFILE = 'orders.csv'
-from datetime import datetime
+import json
+ORDERFILE = 'orders.json'
 
 items= {"아메리카노":4500,"라떼":5000,"바닐라라떼":5500,"핫초코":5000,"망고스무디":6000}
 class Order:
@@ -14,8 +14,8 @@ class Order:
         # CSV 형태로 저장
 
         # def 가격계산 추가():
-	    # 결제시각은 자동추가
-	    # def 주문 파일에 저장():
+        # 결제시각은 자동추가
+        # def 주문 파일에 저장():
 
     def calculate_price(self) -> int:
         self.price = items[self.menu]
@@ -57,24 +57,24 @@ class DailyOrder:
         self.orders: list[Order] = []
 
     # 주문내역 1개 추가하는 메서드
-    def add(self, name: str) -> None:
-        self.orders.append(Order(name))
+    def add(self, cup: str) -> None:
+        self.orders.append(Order(cup))
 
     # 날짜 입력 후 (통계정보?) 조회
-    def show_today(self, day: str) -> None:
-        # [✔] / [ ] 표시
-        if len(self.orders) == 0:
-            print("등록된 주문내역이 없습니다.")
-            return
-        for h in self.habits:
-            mark = " "
-            if h.is_done(day):
-                mark = "✔"
-            print(f"[{mark}] {h.name} (총 {h.total()}일)")
+    # def show_today(self, day: str) -> None:
+    #     # [✔] / [ ] 표시
+    #     if len(self.orders) == 0:
+    #         print("등록된 주문내역이 없습니다.")
+    #         return
+    #     for h in self.habits:
+    #         mark = " "
+    #         if h.is_done(day):
+    #             mark = "✔"
+    #         print(f"[{mark}] {h.name} (총 {h.total()}일)")
 
     # 주문내역 파일에 저장
     def save(self, filename: str) -> None:
-        data = [h.to_dict() for h in self.habits]
+        data = [o.to_dict() for o in self.orders]
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
@@ -86,37 +86,64 @@ class DailyOrder:
         except FileNotFoundError:
             return
         for d in data:
-            h = Habit(d["이름"])
-            h.done_dates = d["체크한날"]
-            self.habits.append(h)
+            o = Order(d["메뉴"])
+            #o.done_dates = d["체크한날"]
+            self.orders.append(o)
 
-    def find(self, title: str) -> Book | None:
-        pass  # TODO
-        for b in self.books:
-            if b.title == title:
-                return b
-        return None
 # { '손님1', '라떼', 2, m, 2 } 입력받아 저장
-def add_habit(tracker: HabitTracker) -> None:
-    name = input("새 습관: ").strip()
-    if name == "":
-        print("이름을 입력하세요.")
-    elif tracker.find(name) is not None:
-        print("이미 있는 습관입니다.")
+def add_order(order: DailyOrder) -> None:
+    cup = input("메뉴 이름을 말씀해주세요.: ").strip()
+    if cup == "":
+        print("메뉴를 입력하세요.")
     else:
-        tracker.add(name)
-        print(f"'{name}' 추가 완료")
+        order.add(cup)
+        print(f"'{cup}' 추가 완료")
 
 
-    #print("1. 주문 | 2. 영수증 출력 | 3. 매출 통계")
+def main() -> None:
+    order = DailyOrder()
+    order.load(ORDERFILE)
 
-# 메뉴판
-# --------------------
-# | 아메리카노    4500 ㅣ
-# | 라떼        5000 ㅣ
-# | 바닐라라떼	  5500 ㅣ
-# | 핫초코		 5000 ㅣ
-# | 망고스무디    6000 ㅣ
-# | 샷 추가      +500 ㅣ
-# | 사이즈업	  +500 ㅣ
-# --------------------
+    while True:
+        print("1. 주문하기 | 2. 결제하기")
+        print("3. 영수증 출력 | 4. 매출 통계 확인")
+
+        choice = input("선택: ").strip()
+        if choice == "1":
+            # 메뉴판 출력
+            # -------------------
+            # | 아메리카노    4500 ㅣ
+            # | 라떼        5000 ㅣ
+            # | 바닐라라떼    5500 ㅣ
+            # | 핫초코       5000 ㅣ
+            # | 망고스무디    6000 ㅣ
+            # | 샷 추가      +500 ㅣ
+            # | 2샷 추가    +1000 ㅣ
+            # | 사이즈업      +500 ㅣ
+            # --------------------
+            print("=====[메뉴판]=====")
+            add_order(order)
+            # 메뉴 이름, 사이즈, 추가하실 샷 수를 말씀해주세요.
+            # 몇 잔 드릴까요?
+        elif choice == "2":
+            pass
+            # 결제는 어떻게 하시겠어요?
+            # 총 [12000원] 결제 완료되었습니다.
+            # 총 금액 공식 ( {price} + {size} + {shot} ) * quantity
+            # [500번]으로 불러드리겠습니다.
+            # 총 금액, 결제 시간정보까지 저장됨
+            # order.save(CSVFILE)
+        elif choice == "3":
+            pass
+            # 고객 숫자 입력 - 500
+            # 영수증 출력
+        elif choice == "4":
+            pass
+            # 날짜 입력 0000-00-00
+            # 일일 매출 통계 출력
+        else:
+            print("잘못된 선택입니다.")
+
+
+if __name__ == "__main__":
+    main()
