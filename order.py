@@ -1,19 +1,56 @@
 CSVFILE = 'orders.csv'
+from datetime import datetime
 
+items= {"아메리카노":4500,"라떼":5000,"바닐라라떼":5500,"핫초코":5000,"망고스무디":6000}
 class Order:
-    def __init__(self, name: str) -> None:
-        #elf.name = name
-        #self.done_dates: list[str] = []
-        
-        # nickname, menu, price, datetime, quantity, size, shot, isCard
+    def __init__(self, menu:str, quantity:int, size:str, shot:int) -> None:
+        self.menu = menu
+        self.price = 0
+        self.paymentTime = None
+        self.quantity = quantity
+        self.size = size
+        self.shot = shot
+        self.isCard = None
         # CSV 형태로 저장
 
         # def 가격계산 추가():
 	    # 결제시각은 자동추가
 	    # def 주문 파일에 저장():
 
-    # def to_dict(self) -> dict:
-    #     return {"이름": self.name, "체크한날": self.done_dates}
+    def calculate_price(self) -> int:
+        self.price = items[self.menu]
+        #print(f"메뉴가격:  {self.price}")
+        if self.size == "L":
+            self.price += 500
+        #print(f" 사이즈 UP 가격:  {self.price}")
+        self.price += self.shot * 500
+        #print(f"샷 추가 개수 :  {self.shot}")
+        #print(f"샷 추가 가격 :  {self.price}")
+        return self.price * self.quantity
+
+    def payTime(self) -> None:
+        self.paymentTime = datetime.now()
+
+    def print_price(self) -> int:
+        return self.price
+
+    def isCard(self,card:bool) -> None:
+        if card == True:
+            self.isCard = True
+        else:
+            self.isCard = False
+    def setQuantity(self,quantity:int):
+        self.quantity = quantity
+        
+def main() -> None:
+    order =  Order("아메리카노", 1, "L", 2)
+    order.calculate_price()
+    print(order.price)
+    order.payTime()
+    print(order.paymentTime)
+
+if __name__ == "__main__":
+    main()
 
 class DailyOrder:
     def __init__(self) -> None:
@@ -53,6 +90,12 @@ class DailyOrder:
             h.done_dates = d["체크한날"]
             self.habits.append(h)
 
+    def find(self, title: str) -> Book | None:
+        pass  # TODO
+        for b in self.books:
+            if b.title == title:
+                return b
+        return None
 # { '손님1', '라떼', 2, m, 2 } 입력받아 저장
 def add_habit(tracker: HabitTracker) -> None:
     name = input("새 습관: ").strip()
@@ -65,11 +108,7 @@ def add_habit(tracker: HabitTracker) -> None:
         print(f"'{name}' 추가 완료")
 
 
-def main() -> None:
-    order = DailyOrder()
-    order.load(CSVFILE)
-
-    print("1. 주문 | 2. 영수증 출력 | 3. 매출 통계")
+    #print("1. 주문 | 2. 영수증 출력 | 3. 매출 통계")
 
 # 메뉴판
 # --------------------
